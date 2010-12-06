@@ -683,12 +683,12 @@ sub keywords {
 sub Vars {
   my $self = shift;
   $self->{'.sep'} = shift || $self->{'.sep'} || "\0";
-  if (wantarray) {
-      my %hash;
-      for my $param ( $self->param ) {
-          $hash{$param} = join $self->{'.sep'}, $self->param( $param );
-      }
-      return %hash;
+  if ( wantarray ) {
+    my %hash;
+    for my $param ( $self->param ) {
+      $hash{$param} = join $self->{'.sep'}, $self->param( $param );
+    }
+    return %hash;
   }
   else {
     my %tied;
@@ -993,19 +993,22 @@ sub header {
     @params
    );
 
-    # CR escaping for values, per RFC 822
-    for my $header ($type,$status,$cookie,$target,$expires,$nph,$charset,$attachment,$p3p,@other) {
-        if (defined $header) {
-            $header =~ s/
+  # CR escaping for values, per RFC 822
+  for my $header (
+    $type, $status,  $cookie,     $target, $expires,
+    $nph,  $charset, $attachment, $p3p,    @other
+   ) {
+    if ( defined $header ) {
+      $header =~ s/
                 (?<=\n)    # For any character proceeded by a newline
                 (?=\S)     # ... that is not whitespace
-            / /xg;         # ... inject a leading space in the new line
-        }
+            / /xg;    # ... inject a leading space in the new line
     }
+  }
 
   $nph ||= $self->{'.globals'}->{'NPH'};
   $charset = $self->charset( $charset )
-   ;    # get charset (and set new charset if supplied)
+   ;                  # get charset (and set new charset if supplied)
    # rearrange() was designed for the HTML portion, so we need to fix it up a little.
 
   for ( @other ) {
@@ -1122,7 +1125,14 @@ sub multipart_init {
   my ( $self, @p ) = @_;
   use CGI::Simple::Util qw(rearrange);
   my ( $boundary, @other ) = rearrange( ['BOUNDARY'], @p );
-  $boundary = $boundary || '------- =_aaaaaaaaaa0';
+  if ( !$boundary ) {
+    $boundary = '------- =_';
+    my @chrs = ( '0' .. '9', 'A' .. 'Z', 'a' .. 'z' );
+    for ( 1 .. 17 ) {
+      $boundary .= $chrs[ rand( scalar @chrs ) ];
+    }
+  }
+
   my $CRLF = $self->crlf;    # get CRLF sequence
   my $warning
    = "WARNING: YOUR BROWSER DOESN'T SUPPORT THIS SERVER-PUSH TECHNOLOGY.";
@@ -3899,7 +3909,8 @@ tommyw, grinder, Jaap, vek, erasei, jlongino and strider_corinth
 
 Thanks for patches to:
 
-Ewan Edwards, Joshua N Pritikin, Mike Barry
+Ewan Edwards, Joshua N Pritikin, Mike Barry, Michael Nachbaur, Chris
+Williams, Mark Stosberg, Krasimir Berov, Yamada Masahiro
 
 =head1 LICENCE AND COPYRIGHT
 
